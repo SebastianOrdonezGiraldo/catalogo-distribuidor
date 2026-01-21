@@ -1,8 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta http-equiv="refresh" content="0; url=catalogo-cliente-final.pdf">
+  <meta charset="UTF-8">
+  <title>Catálogos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    a {
+      display: block;
+      margin: 15px 0;
+      padding: 15px;
+      text-decoration: none;
+      background: #0d6efd;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    a:hover {
+      background: #0b5ed7;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Selecciona un catálogo</h1>
+
+    <a href="catalogo-cliente-final.pdf" target="_blank">
+      📘 Catálogo Cliente Final
+    </a>
+
+    <a href="catalogo-distribuidor.pdf" target="_blank">
+      📗 Catálogo Distribuidor
+    </a>
+  </div>
 </body>
 </html>
