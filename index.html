@@ -2,7 +2,19 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Catálogos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogos - Import Corporal Medical</title>
+  
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D10S3W36Q"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-6D10S3W36Q');
+  </script>
+  
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,13 +55,20 @@
   <div class="container">
     <h1>Selecciona un catálogo</h1>
 
-    <a href="catalogo-cliente-final.pdf" target="_blank">
-      📘 Catálogo Cliente Final
-    </a>
-
-    <a href="catalogo-distribuidor.pdf" target="_blank">
+    <a href="catalogo-distribuidor.pdf" target="_blank" onclick="trackCatalogClick('Distribuidor')">
       📗 Catálogo Distribuidor
     </a>
   </div>
+
+  <script>
+    // Función para rastrear clicks en los catálogos
+    function trackCatalogClick(catalogName) {
+      gtag('event', 'catalog_click', {
+        'event_category': 'Catalogo',
+        'event_label': catalogName,
+        'value': 1
+      });
+    }
+  </script>
 </body>
 </html>
