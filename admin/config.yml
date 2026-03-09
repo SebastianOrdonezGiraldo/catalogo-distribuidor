@@ -3,7 +3,7 @@ backend:
   branch: main
 
 media_folder: "."
-public_folder: "."
+public_folder: "/"
 
 locale: "es"
 
@@ -14,30 +14,30 @@ collections:
     files:
       - name: "catalogo-distribuidor"
         label: "Catálogo Distribuidor"
-        file: "catalogo-distribuidor.pdf"
+        file: "catalogo-distribuidor.md"
         fields:
-          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+          - { label: "PDF", name: "pdf", widget: "file", media_folder: "/", public_folder: "/" }
 
       - name: "catalogo-cliente-final"
         label: "Catálogo Cliente Final"
-        file: "catalogo-cliente-final.pdf"
+        file: "catalogo-cliente-final.md"
         fields:
-          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+          - { label: "PDF", name: "pdf", widget: "file", media_folder: "/", public_folder: "/" }
 
       - name: "catalogo-regimen-simplificado"
         label: "Catálogo Régimen Simplificado"
-        file: "catalogo-regimen-simplificado.pdf"
+        file: "catalogo-regimen-simplificado.md"
         fields:
-          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+          - { label: "PDF", name: "pdf", widget: "file", media_folder: "/", public_folder: "/" }
 
       - name: "catalogo-sin-precios"
         label: "Catálogo Sin Precios"
-        file: "catalogo-sin-precios.pdf"
+        file: "catalogo-sin-precios.md"
         fields:
-          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+          - { label: "PDF", name: "pdf", widget: "file", media_folder: "/", public_folder: "/" }
 
       - name: "catalogo-sin-precios-regimen-simplificado"
         label: "Catálogo Sin Precios Régimen Simplificado"
-        file: "catalogo-sin-precios-regimen-simplificado.pdf"
+        file: "catalogo-sin-precios-regimen-simplificado.md"
         fields:
-          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+          - { label: "PDF", name: "pdf", widget: "file", media_folder: "/", public_folder: "/" }
