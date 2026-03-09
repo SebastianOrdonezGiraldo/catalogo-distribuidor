@@ -1,0 +1,3 @@
+---
+pdf: /catalogo-distribuidor.pdf
+---
