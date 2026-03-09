@@ -1,0 +1,43 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "."
+public_folder: "."
+
+locale: "es"
+
+collections:
+  - name: "catalogos"
+    label: "Catálogos"
+    label_singular: "Catálogo"
+    files:
+      - name: "catalogo-distribuidor"
+        label: "Catálogo Distribuidor"
+        file: "catalogo-distribuidor.pdf"
+        fields:
+          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+
+      - name: "catalogo-cliente-final"
+        label: "Catálogo Cliente Final"
+        file: "catalogo-cliente-final.pdf"
+        fields:
+          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+
+      - name: "catalogo-regimen-simplificado"
+        label: "Catálogo Régimen Simplificado"
+        file: "catalogo-regimen-simplificado.pdf"
+        fields:
+          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+
+      - name: "catalogo-sin-precios"
+        label: "Catálogo Sin Precios"
+        file: "catalogo-sin-precios.pdf"
+        fields:
+          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
+
+      - name: "catalogo-sin-precios-regimen-simplificado"
+        label: "Catálogo Sin Precios Régimen Simplificado"
+        file: "catalogo-sin-precios-regimen-simplificado.pdf"
+        fields:
+          - { label: "Archivo PDF", name: "file", widget: "file", media_folder: "/", public_folder: "/", allow_multiple: false, choose_url: false }
