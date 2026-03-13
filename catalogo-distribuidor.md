@@ -1,3 +1,0 @@
----
-pdf: /catalogo-distribuidor.pdf
----
