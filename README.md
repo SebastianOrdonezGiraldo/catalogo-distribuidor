@@ -45,7 +45,7 @@ Referencia local: `.env.example`.
 - `/api/auth/logout`: logout admin
 - `/api/auth/session`: valida sesion
 - `/api/documents`: lista documentos
-- `/api/documents/upload?id=<document-id>`: reemplaza PDF
+- `/api/documents/upload-url?id=<document-id>`: genera URL firmada para subir PDF directo a Supabase
 - `/api/documents/delete?id=<document-id>`: borra PDF
 - `/docs/:filename`: redireccion a PDF publico en Supabase
 

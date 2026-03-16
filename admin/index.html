@@ -242,6 +242,40 @@
     return payload;
   }
 
+  async function uploadPdfDirectly(signedUrl, file) {
+    const uploadFormData = new FormData();
+    uploadFormData.append("cacheControl", "3600");
+    uploadFormData.append("", file);
+
+    const response = await fetch(signedUrl, {
+      method: "PUT",
+      headers: {
+        "x-upsert": "true"
+      },
+      body: uploadFormData
+    });
+
+    if (!response.ok) {
+      let message = "Fallo la carga del PDF en Storage.";
+      try {
+        const data = await response.json();
+        if (data && (data.error || data.message)) {
+          message = data.error || data.message;
+        }
+      } catch (_error) {
+        try {
+          const text = await response.text();
+          if (text) {
+            message = text;
+          }
+        } catch (_errorText) {
+          // Keep default message.
+        }
+      }
+      throw new Error(message + " (HTTP " + response.status + ")");
+    }
+  }
+
   function attachTableHandlers() {
     for (const uploadForm of document.querySelectorAll("form[data-upload-id]")) {
       uploadForm.addEventListener("submit", async (event) => {
@@ -252,14 +286,16 @@
           setStatus(dashboardStatus, "Selecciona un PDF para subir.", "error");
           return;
         }
-        const formData = new FormData();
-        formData.append("pdf", input.files[0]);
+        const selectedFile = input.files[0];
         try {
-          setStatus(dashboardStatus, "Subiendo PDF...", "");
-          await apiRequest("/api/documents/upload?id=" + encodeURIComponent(id), {
-            method: "POST",
-            body: formData
+          setStatus(dashboardStatus, "Preparando subida...", "");
+          const uploadTicket = await apiRequest("/api/documents/upload-url?id=" + encodeURIComponent(id), {
+            method: "POST"
           });
+
+          setStatus(dashboardStatus, "Subiendo PDF a Supabase...", "");
+          await uploadPdfDirectly(uploadTicket.signedUrl, selectedFile);
+
           setStatus(dashboardStatus, "Documento actualizado.", "ok");
           await loadDocuments();
         } catch (error) {
