@@ -1,11 +1,13 @@
 function readConfig() {
-  const supabaseUrl = process.env.SUPABASE_URL || "";
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  const bucket = process.env.SUPABASE_BUCKET || "catalogos";
-  const adminUsername = process.env.ADMIN_USERNAME || "admin";
-  const adminPassword = process.env.ADMIN_PASSWORD || "";
+  const supabaseUrl = String(process.env.SUPABASE_URL || "").trim();
+  const supabaseServiceRoleKey = String(
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  ).trim();
+  const bucket = String(process.env.SUPABASE_BUCKET || "catalogos").trim();
+  const adminUsername = String(process.env.ADMIN_USERNAME || "admin").trim();
+  const adminPassword = String(process.env.ADMIN_PASSWORD || "");
   const adminSessionSecret =
-    process.env.ADMIN_SESSION_SECRET || process.env.SESSION_SECRET || "";
+    String(process.env.ADMIN_SESSION_SECRET || process.env.SESSION_SECRET || "").trim();
 
   const missing = [];
 

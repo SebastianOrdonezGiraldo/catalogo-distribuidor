@@ -2,6 +2,7 @@ const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
 const { createServiceClient } = require("../_lib/supabase");
 const { DOCUMENTS } = require("../_lib/documents");
+const { ensureBucketExists } = require("../_lib/storage");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -17,6 +18,14 @@ module.exports = async function handler(req, res) {
     }
 
     const supabase = createServiceClient(config);
+    const bucketCheck = await ensureBucketExists(supabase, config.bucket);
+    if (!bucketCheck.ok) {
+      res.status(500).json({
+        error: `No se pudo acceder al bucket '${config.bucket}': ${bucketCheck.error.message}`,
+      });
+      return;
+    }
+
     const { data: files, error } = await supabase.storage
       .from(config.bucket)
       .list("", { limit: 100, offset: 0, sortBy: { column: "name", order: "asc" } });

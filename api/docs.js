@@ -2,6 +2,7 @@ const { ensureStorageConfig } = require("./_lib/config");
 const { createServiceClient } = require("./_lib/supabase");
 const { DOCUMENTS_BY_FILENAME } = require("./_lib/documents");
 const { getQueryParam } = require("./_lib/url");
+const { ensureBucketExists } = require("./_lib/storage");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -20,13 +21,25 @@ module.exports = async function handler(req, res) {
 
     const config = ensureStorageConfig();
     const supabase = createServiceClient(config);
+    const bucketCheck = await ensureBucketExists(supabase, config.bucket);
+    if (!bucketCheck.ok) {
+      res.status(500).send(
+        `No se pudo acceder al bucket '${config.bucket}': ${bucketCheck.error.message}`,
+      );
+      return;
+    }
 
     const { data, error } = await supabase.storage
       .from(config.bucket)
       .createSignedUrl(documentDefinition.filename, 60);
 
     if (error || !data?.signedUrl) {
-      res.status(404).send("Documento no disponible.");
+      const message = String(error?.message || "").toLowerCase();
+      if (message.includes("not found") || message.includes("does not exist")) {
+        res.status(404).send("Documento no disponible.");
+        return;
+      }
+      res.status(500).send(error?.message || "Error al generar URL firmada.");
       return;
     }
 
