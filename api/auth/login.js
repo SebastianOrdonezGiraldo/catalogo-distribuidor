@@ -1,4 +1,4 @@
-const { ensureConfig } = require("../_lib/config");
+const { ensureAuthConfig } = require("../_lib/config");
 const { createSessionToken, setSessionCookie } = require("../_lib/auth");
 const { parseJsonBody } = require("../_lib/request");
 
@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const config = ensureConfig();
+    const config = ensureAuthConfig();
     const body = await parseJsonBody(req);
     const username = String(body.username || "").trim();
     const password = String(body.password || "");

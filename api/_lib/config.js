@@ -8,10 +8,6 @@ function readConfig() {
     process.env.ADMIN_SESSION_SECRET || process.env.SESSION_SECRET || "";
 
   const missing = [];
-  if (!supabaseUrl) missing.push("SUPABASE_URL");
-  if (!supabaseServiceRoleKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
-  if (!adminPassword) missing.push("ADMIN_PASSWORD");
-  if (!adminSessionSecret) missing.push("ADMIN_SESSION_SECRET");
 
   return {
     supabaseUrl,
@@ -26,9 +22,44 @@ function readConfig() {
 
 function ensureConfig() {
   const config = readConfig();
-  if (config.missing.length > 0) {
+  const missing = [];
+  if (!config.supabaseUrl) missing.push("SUPABASE_URL");
+  if (!config.supabaseServiceRoleKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  if (!config.adminPassword) missing.push("ADMIN_PASSWORD");
+  if (!config.adminSessionSecret) missing.push("ADMIN_SESSION_SECRET");
+  if (missing.length > 0) {
     const error = new Error(
-      `Faltan variables de entorno: ${config.missing.join(", ")}`,
+      `Faltan variables de entorno: ${missing.join(", ")}`,
+    );
+    error.statusCode = 500;
+    throw error;
+  }
+  return config;
+}
+
+function ensureStorageConfig() {
+  const config = readConfig();
+  const missing = [];
+  if (!config.supabaseUrl) missing.push("SUPABASE_URL");
+  if (!config.supabaseServiceRoleKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  if (missing.length > 0) {
+    const error = new Error(
+      `Faltan variables de entorno: ${missing.join(", ")}`,
+    );
+    error.statusCode = 500;
+    throw error;
+  }
+  return config;
+}
+
+function ensureAuthConfig() {
+  const config = readConfig();
+  const missing = [];
+  if (!config.adminPassword) missing.push("ADMIN_PASSWORD");
+  if (!config.adminSessionSecret) missing.push("ADMIN_SESSION_SECRET");
+  if (missing.length > 0) {
+    const error = new Error(
+      `Faltan variables de entorno: ${missing.join(", ")}`,
     );
     error.statusCode = 500;
     throw error;
@@ -39,4 +70,6 @@ function ensureConfig() {
 module.exports = {
   readConfig,
   ensureConfig,
+  ensureStorageConfig,
+  ensureAuthConfig,
 };

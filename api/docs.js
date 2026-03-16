@@ -1,6 +1,7 @@
-const { ensureConfig } = require("./_lib/config");
+const { ensureStorageConfig } = require("./_lib/config");
 const { createServiceClient } = require("./_lib/supabase");
 const { DOCUMENTS_BY_FILENAME } = require("./_lib/documents");
+const { getQueryParam } = require("./_lib/url");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -10,14 +11,14 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const filename = String(req.query.filename || "");
+    const filename = getQueryParam(req, "filename");
     const documentDefinition = DOCUMENTS_BY_FILENAME[filename];
     if (!documentDefinition) {
       res.status(404).send("Documento no encontrado.");
       return;
     }
 
-    const config = ensureConfig();
+    const config = ensureStorageConfig();
     const supabase = createServiceClient(config);
 
     const { data, error } = await supabase.storage
@@ -32,7 +33,11 @@ module.exports = async function handler(req, res) {
     res.setHeader("Cache-Control", "public, max-age=300");
     res.writeHead(302, { Location: data.signedUrl });
     res.end();
-  } catch (_error) {
+  } catch (error) {
+    if (error && error.statusCode) {
+      res.status(error.statusCode).send(error.message);
+      return;
+    }
     res.status(500).send("Error interno.");
   }
 };

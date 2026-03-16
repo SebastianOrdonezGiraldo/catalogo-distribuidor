@@ -1,4 +1,4 @@
-const { ensureConfig } = require("../_lib/config");
+const { ensureAuthConfig } = require("../_lib/config");
 const { hasValidSession } = require("../_lib/auth");
 
 module.exports = async function handler(req, res) {
@@ -9,7 +9,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const config = ensureConfig();
+    const config = ensureAuthConfig();
     const authenticated = hasValidSession(req, config);
     res.status(200).json({
       authenticated,

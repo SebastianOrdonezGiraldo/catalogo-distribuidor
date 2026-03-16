@@ -2,6 +2,7 @@ const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
 const { createServiceClient } = require("../_lib/supabase");
 const { DOCUMENTS_BY_ID } = require("../_lib/documents");
+const { getQueryParam } = require("../_lib/url");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "DELETE") {
@@ -16,7 +17,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const id = String(req.query.id || "");
+    const id = getQueryParam(req, "id");
     const documentDefinition = DOCUMENTS_BY_ID[id];
     if (!documentDefinition) {
       res.status(404).json({ error: "Documento no encontrado." });
