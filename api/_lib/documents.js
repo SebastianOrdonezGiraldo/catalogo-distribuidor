@@ -24,6 +24,11 @@ const DOCUMENTS = [
     label: "Catalogo Sin Precios Regimen Simplificado",
     filename: "catalogo-sin-precios-regimen-simplificado.pdf",
   },
+  {
+    id: "cliente-final-regimen-simplificado",
+    label: "Cliente Final Regimen Simplificado",
+    filename: "cliente-final-regimen-simplificado.pdf",
+  },
 ];
 
 const DOCUMENTS_BY_ID = Object.fromEntries(DOCUMENTS.map((doc) => [doc.id, doc]));
