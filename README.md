@@ -25,7 +25,7 @@ Referencia local: `.env.example`.
 ## Configuracion en Supabase
 
 1. Crear bucket en Storage (ejemplo: `catalogos`).
-2. Puedes dejar el bucket **privado**. La ruta `/docs/:filename` genera una URL firmada.
+2. Puedes dejar el bucket **privado**. La ruta `/docs/:filename` entrega el PDF desde backend.
 3. Guardar en Vercel:
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY` (no usar publishable key para escritura/borrado desde API)
@@ -47,7 +47,7 @@ Referencia local: `.env.example`.
 - `/api/documents`: lista documentos
 - `/api/documents/upload-url?id=<document-id>`: genera URL firmada para subir PDF directo a Supabase
 - `/api/documents/delete?id=<document-id>`: borra PDF
-- `/docs/:filename`: redireccion a PDF publico en Supabase
+- `/docs/:filename`: entrega estable del PDF sin URL temporal visible
 
 ## Desarrollo local
 

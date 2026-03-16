@@ -31,21 +31,31 @@ module.exports = async function handler(req, res) {
 
     const { data, error } = await supabase.storage
       .from(config.bucket)
-      .createSignedUrl(documentDefinition.filename, 60);
+      .download(documentDefinition.filename);
 
-    if (error || !data?.signedUrl) {
+    if (error || !data) {
       const message = String(error?.message || "").toLowerCase();
       if (message.includes("not found") || message.includes("does not exist")) {
         res.status(404).send("Documento no disponible.");
         return;
       }
-      res.status(500).send(error?.message || "Error al generar URL firmada.");
+      res.status(500).send(error?.message || "Error al descargar documento.");
       return;
     }
 
-    res.setHeader("Cache-Control", "public, max-age=300");
-    res.writeHead(302, { Location: data.signedUrl });
-    res.end();
+    const arrayBuffer = await data.arrayBuffer();
+    const fileBuffer = Buffer.from(arrayBuffer);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${documentDefinition.filename}"`,
+    );
+    res.setHeader("Content-Length", String(fileBuffer.length));
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.status(200).send(fileBuffer);
   } catch (error) {
     if (error && error.statusCode) {
       res.status(error.statusCode).send(error.message);
