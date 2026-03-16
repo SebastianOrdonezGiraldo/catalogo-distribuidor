@@ -2,19 +2,15 @@
   "name": "catalogo-distribuidor",
   "version": "1.0.0",
   "private": true,
-  "description": "Sitio catalogo con panel administrador para PDFs",
-  "main": "server.js",
+  "description": "Sitio catalogo con admin en Vercel y almacenamiento en Supabase",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "vercel dev"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "memorystore": "^1.6.7",
-    "multer": "^2.0.2"
+    "@supabase/supabase-js": "^2.49.8",
+    "busboy": "^1.6.0"
   }
 }

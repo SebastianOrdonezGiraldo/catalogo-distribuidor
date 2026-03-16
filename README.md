@@ -1,50 +1,62 @@
-# Catalogo Distribuidor
+# Catalogo Distribuidor (Vercel + Supabase)
 
-Proyecto estatico con panel administrador en `/admin` para reemplazar y borrar PDFs.
+Sitio estatico con panel administrador en `/admin` para reemplazar y borrar PDFs.
+Los documentos se guardan en **Supabase Storage** y se sirven por `/docs/:filename`.
 
-## Requisitos
+## Stack
 
-- Node.js 20 o superior
+- Hosting y funciones API: Vercel (`/api/*`)
+- Almacenamiento de PDFs: Supabase Storage
+- Autenticacion admin: cookie de sesion HTTP-only (usuario/contrasena por variables de entorno)
 
 ## Variables de entorno
 
-- `ADMIN_USERNAME`: usuario del panel administrador (default: `admin`)
-- `ADMIN_PASSWORD`: contrasena del panel (obligatoria en produccion)
-- `SESSION_SECRET`: secreto para cookies de sesion (obligatorio en produccion)
-- `PDF_STORAGE_DIR`: directorio donde se guardan los PDFs (obligatorio en produccion)
+Define estas variables en Vercel:
 
-En Render, para que los cambios en PDFs persistan entre reinicios/deploys, monta un disco persistente y usa su ruta en `PDF_STORAGE_DIR` (ejemplo: `/var/data/catalogos`).
-En produccion el servidor exige `PDF_STORAGE_DIR`; si no existe, no inicia.
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_BUCKET` (default recomendado: `catalogos`)
+- `ADMIN_USERNAME` (default local: `admin`)
+- `ADMIN_PASSWORD`
+- `ADMIN_SESSION_SECRET`
+
+Referencia local: `.env.example`.
+
+## Configuracion en Supabase
+
+1. Crear bucket en Storage (ejemplo: `catalogos`).
+2. Puedes dejar el bucket **privado**. La ruta `/docs/:filename` genera una URL firmada.
+3. Guardar en Vercel:
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY` (no usar publishable key para escritura/borrado desde API)
+
+## Configuracion en Vercel
+
+1. Importar el repositorio en Vercel.
+2. Runtime Node.js (default).
+3. Agregar las variables de entorno del bloque anterior.
+4. Deploy.
+
+## Rutas
+
+- `/`: pagina publica
+- `/admin`: panel administrador
+- `/api/auth/login`: login admin
+- `/api/auth/logout`: logout admin
+- `/api/auth/session`: valida sesion
+- `/api/documents`: lista documentos
+- `/api/documents/upload?id=<document-id>`: reemplaza PDF
+- `/api/documents/delete?id=<document-id>`: borra PDF
+- `/docs/:filename`: redireccion a PDF publico en Supabase
 
 ## Desarrollo local
 
 ```bash
 npm install
-npm run dev
+npx vercel dev
 ```
 
-## Produccion
+## Importante
 
-```bash
-npm install
-npm start
-```
-
-## Configuracion en Render (persistencia real)
-
-1. Crea un `Web Service` desde este repositorio.
-2. En `Disks`, agrega un `Persistent Disk` y define un `Mount Path` (ejemplo: `/var/data/catalogos`).
-3. En `Environment`, define:
-   - `ADMIN_USERNAME`
-   - `ADMIN_PASSWORD`
-   - `SESSION_SECRET`
-   - `PDF_STORAGE_DIR` con el mismo `Mount Path` del disco.
-4. Usa `npm start` como Start Command.
-5. Haz deploy. En el primer arranque, los PDFs iniciales del repo se copian al disco persistente.
-
-## Rutas clave
-
-- `/`: sitio publico
-- `/admin`: login de administrador
-- `/admin/dashboard`: panel de gestion de PDFs
-- `/docs/:filename`: entrega publica de PDF administrado
+- La `SUPABASE_SERVICE_ROLE_KEY` es secreta: solo backend (variables de entorno), nunca frontend.
+- Si ya publicaste una clave por error, rota la clave en Supabase.

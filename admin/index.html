@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Catalogos</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+      color: #0f172a;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.24);
+      padding: 24px;
+    }
+    .hidden {
+      display: none;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    p {
+      margin: 0 0 16px;
+      color: #334155;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #334155;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .button:hover { background: #1d4ed8; }
+    .button.secondary {
+      background: #0f172a;
+    }
+    .button.danger {
+      background: #dc2626;
+    }
+    .button.ghost {
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .status {
+      font-size: 14px;
+      margin-bottom: 14px;
+      color: #334155;
+    }
+    .status.error { color: #b91c1c; }
+    .status.ok { color: #166534; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+      vertical-align: top;
+      padding: 12px;
+      font-size: 14px;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-size: 13px;
+    }
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .pill.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .pill.off {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .file-input {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px;
+      background: #fff;
+      font-size: 12px;
+      max-width: 220px;
+    }
+    .small {
+      color: #64748b;
+      font-size: 12px;
+    }
+    @media (max-width: 900px) {
+      body { padding: 16px; }
+      th, td { font-size: 12px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+<main class="container">
+  <section id="login-card" class="card">
+    <h1>Panel Administrador</h1>
+    <p>Accede para reemplazar y borrar documentos PDF.</p>
+    <div id="login-status" class="status"></div>
+    <form id="login-form">
+      <label for="username">Usuario</label>
+      <input id="username" name="username" type="text" autocomplete="username" required>
+      <label for="password">Contrasena</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="button" type="submit">Ingresar</button>
+    </form>
+  </section>
+
+  <section id="dashboard-card" class="card hidden">
+    <div class="topbar">
+      <div>
+        <h1>Administracion de PDFs</h1>
+        <p id="session-label" class="small"></p>
+      </div>
+      <div class="actions">
+        <button id="refresh-btn" class="button ghost" type="button">Actualizar</button>
+        <button id="logout-btn" class="button secondary" type="button">Cerrar sesion</button>
+      </div>
+    </div>
+
+    <div id="dashboard-status" class="status"></div>
+
+    <table>
+      <thead>
+      <tr>
+        <th>Documento</th>
+        <th>Archivo</th>
+        <th>Estado</th>
+        <th>Actualizado</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody id="documents-body"></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+  const loginCard = document.getElementById("login-card");
+  const dashboardCard = document.getElementById("dashboard-card");
+  const loginForm = document.getElementById("login-form");
+  const loginStatus = document.getElementById("login-status");
+  const dashboardStatus = document.getElementById("dashboard-status");
+  const sessionLabel = document.getElementById("session-label");
+  const documentsBody = document.getElementById("documents-body");
+  const refreshBtn = document.getElementById("refresh-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+
+  function setStatus(element, text, mode) {
+    element.textContent = text || "";
+    element.classList.remove("ok", "error");
+    if (mode) {
+      element.classList.add(mode);
+    }
+  }
+
+  function showLogin() {
+    loginCard.classList.remove("hidden");
+    dashboardCard.classList.add("hidden");
+  }
+
+  function showDashboard(username) {
+    sessionLabel.textContent = "Sesion activa: " + username;
+    loginCard.classList.add("hidden");
+    dashboardCard.classList.remove("hidden");
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes) return "-";
+    const kb = bytes / 1024;
+    if (kb < 1024) return kb.toFixed(1) + " KB";
+    return (kb / 1024).toFixed(2) + " MB";
+  }
+
+  function formatDate(value) {
+    if (!value) return "-";
+    return new Date(value).toLocaleString("es-CO");
+  }
+
+  async function apiRequest(url, options) {
+    const response = await fetch(url, options);
+    let payload = {};
+    try {
+      payload = await response.json();
+    } catch (_error) {
+      payload = {};
+    }
+    if (!response.ok) {
+      throw new Error(payload.error || "Error en la solicitud.");
+    }
+    return payload;
+  }
+
+  function attachTableHandlers() {
+    for (const uploadForm of document.querySelectorAll("form[data-upload-id]")) {
+      uploadForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const id = uploadForm.dataset.uploadId;
+        const input = uploadForm.querySelector("input[type=file]");
+        if (!input.files.length) {
+          setStatus(dashboardStatus, "Selecciona un PDF para subir.", "error");
+          return;
+        }
+        const formData = new FormData();
+        formData.append("pdf", input.files[0]);
+        try {
+          setStatus(dashboardStatus, "Subiendo PDF...", "");
+          await apiRequest("/api/documents/upload?id=" + encodeURIComponent(id), {
+            method: "POST",
+            body: formData
+          });
+          setStatus(dashboardStatus, "Documento actualizado.", "ok");
+          await loadDocuments();
+        } catch (error) {
+          setStatus(dashboardStatus, error.message, "error");
+        }
+      });
+    }
+
+    for (const deleteBtn of document.querySelectorAll("button[data-delete-id]")) {
+      deleteBtn.addEventListener("click", async () => {
+        const id = deleteBtn.dataset.deleteId;
+        const label = deleteBtn.dataset.label;
+        if (!confirm("Se borrara " + label + ". Deseas continuar?")) {
+          return;
+        }
+        try {
+          setStatus(dashboardStatus, "Borrando PDF...", "");
+          await apiRequest("/api/documents/delete?id=" + encodeURIComponent(id), {
+            method: "DELETE"
+          });
+          setStatus(dashboardStatus, "Documento borrado.", "ok");
+          await loadDocuments();
+        } catch (error) {
+          setStatus(dashboardStatus, error.message, "error");
+        }
+      });
+    }
+  }
+
+  function renderDocuments(documents) {
+    if (!documents.length) {
+      documentsBody.innerHTML = "<tr><td colspan='5'>No hay documentos configurados.</td></tr>";
+      return;
+    }
+    documentsBody.innerHTML = documents.map((doc) => {
+      const statusBadge = doc.exists
+        ? "<span class='pill ok'>Disponible</span>"
+        : "<span class='pill off'>No disponible</span>";
+      const viewButton = doc.exists
+        ? "<a class='button ghost' href='" + doc.url + "' target='_blank' rel='noopener noreferrer'>Ver PDF</a>"
+        : "<button class='button ghost' disabled>Ver PDF</button>";
+      const disableDelete = doc.exists ? "" : "disabled";
+      return "<tr>" +
+        "<td>" + doc.label + "</td>" +
+        "<td><strong>" + doc.filename + "</strong><br><span class='small'>" + formatBytes(doc.size) + "</span></td>" +
+        "<td>" + statusBadge + "</td>" +
+        "<td>" + formatDate(doc.updatedAt) + "</td>" +
+        "<td>" +
+          "<div class='actions'>" +
+            "<form data-upload-id='" + doc.id + "'>" +
+              "<input class='file-input' type='file' accept='.pdf,application/pdf' required> " +
+              "<button class='button' type='submit'>Reemplazar</button>" +
+            "</form>" +
+            viewButton +
+            "<button class='button danger' type='button' data-delete-id='" + doc.id + "' data-label='" + doc.label + "' " + disableDelete + ">Borrar</button>" +
+          "</div>" +
+        "</td>" +
+      "</tr>";
+    }).join("");
+    attachTableHandlers();
+  }
+
+  async function loadDocuments() {
+    try {
+      const response = await apiRequest("/api/documents");
+      renderDocuments(response.documents || []);
+      setStatus(dashboardStatus, "Documentos cargados.", "ok");
+    } catch (error) {
+      if (error.message.toLowerCase().includes("no autorizado")) {
+        showLogin();
+        setStatus(loginStatus, "Tu sesion expiro. Ingresa de nuevo.", "error");
+        return;
+      }
+      setStatus(dashboardStatus, error.message, "error");
+    }
+  }
+
+  async function checkSession() {
+    try {
+      const response = await apiRequest("/api/auth/session");
+      if (response.authenticated) {
+        showDashboard(response.username || "admin");
+        await loadDocuments();
+      } else {
+        showLogin();
+      }
+    } catch (error) {
+      showLogin();
+      setStatus(loginStatus, error.message, "error");
+    }
+  }
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(loginForm);
+    const payload = {
+      username: String(formData.get("username") || "").trim(),
+      password: String(formData.get("password") || "")
+    };
+    try {
+      setStatus(loginStatus, "Validando acceso...", "");
+      const response = await apiRequest("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      showDashboard(response.username || payload.username);
+      setStatus(loginStatus, "", "");
+      await loadDocuments();
+    } catch (error) {
+      setStatus(loginStatus, error.message, "error");
+    }
+  });
+
+  refreshBtn.addEventListener("click", async () => {
+    await loadDocuments();
+  });
+
+  logoutBtn.addEventListener("click", async () => {
+    try {
+      await apiRequest("/api/auth/logout", { method: "POST" });
+    } catch (_error) {
+      // Ignore logout network errors, just clear UI.
+    }
+    showLogin();
+    setStatus(dashboardStatus, "", "");
+    setStatus(loginStatus, "Sesion cerrada.", "ok");
+  });
+
+  checkSession();
+</script>
+</body>
+</html>

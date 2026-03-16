@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/docs/:filename",
+      "destination": "/api/docs?filename=:filename"
+    }
+  ]
+}
