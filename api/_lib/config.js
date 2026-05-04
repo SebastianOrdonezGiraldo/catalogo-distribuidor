@@ -1,32 +1,26 @@
+const path = require("path");
+
 function readConfig() {
-  const supabaseUrl = String(process.env.SUPABASE_URL || "").trim();
-  const supabaseServiceRoleKey = String(
-    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-  ).trim();
-  const bucket = String(process.env.SUPABASE_BUCKET || "catalogos").trim();
   const adminUsername = String(process.env.ADMIN_USERNAME || "admin").trim();
   const adminPassword = String(process.env.ADMIN_PASSWORD || "");
   const adminSessionSecret =
     String(process.env.ADMIN_SESSION_SECRET || process.env.SESSION_SECRET || "").trim();
-
-  const missing = [];
+  const storageDirInput = String(
+    process.env.DOCUMENTS_DIR || path.join(process.cwd(), "storage", "documents"),
+  ).trim();
+  const storageDir = path.resolve(storageDirInput);
 
   return {
-    supabaseUrl,
-    supabaseServiceRoleKey,
-    bucket,
     adminUsername,
     adminPassword,
     adminSessionSecret,
-    missing,
+    storageDir,
   };
 }
 
 function ensureConfig() {
   const config = readConfig();
   const missing = [];
-  if (!config.supabaseUrl) missing.push("SUPABASE_URL");
-  if (!config.supabaseServiceRoleKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
   if (!config.adminPassword) missing.push("ADMIN_PASSWORD");
   if (!config.adminSessionSecret) missing.push("ADMIN_SESSION_SECRET");
   if (missing.length > 0) {
@@ -41,16 +35,6 @@ function ensureConfig() {
 
 function ensureStorageConfig() {
   const config = readConfig();
-  const missing = [];
-  if (!config.supabaseUrl) missing.push("SUPABASE_URL");
-  if (!config.supabaseServiceRoleKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
-  if (missing.length > 0) {
-    const error = new Error(
-      `Faltan variables de entorno: ${missing.join(", ")}`,
-    );
-    error.statusCode = 500;
-    throw error;
-  }
   return config;
 }
 

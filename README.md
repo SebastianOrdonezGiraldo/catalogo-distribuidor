@@ -1,41 +1,25 @@
-# Catalogo Distribuidor (Vercel + Supabase)
+# Catalogo Distribuidor (Node.js + almacenamiento local)
 
 Sitio estatico con panel administrador en `/admin` para reemplazar y borrar PDFs.
-Los documentos se guardan en **Supabase Storage** y se sirven por `/docs/:filename`.
+Los documentos se guardan en el disco del servidor y se sirven por `/docs/:filename`.
 
 ## Stack
 
-- Hosting y funciones API: Vercel (`/api/*`)
-- Almacenamiento de PDFs: Supabase Storage
-- Autenticacion admin: cookie de sesion HTTP-only (usuario/contrasena por variables de entorno)
+- Servidor web y API: Node.js + Express
+- Almacenamiento de PDFs: filesystem local del VPS
+- Autenticacion admin: cookie de sesion HTTP-only
 
 ## Variables de entorno
 
-Define estas variables en Vercel:
+Define estas variables en tu VPS:
 
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_BUCKET` (default recomendado: `catalogos`)
+- `PORT` (opcional, default: `3000`)
+- `DOCUMENTS_DIR` (opcional, default: `./storage/documents`)
 - `ADMIN_USERNAME` (default local: `admin`)
 - `ADMIN_PASSWORD`
 - `ADMIN_SESSION_SECRET`
 
 Referencia local: `.env.example`.
-
-## Configuracion en Supabase
-
-1. Crear bucket en Storage (ejemplo: `catalogos`).
-2. Puedes dejar el bucket **privado**. La ruta `/docs/:filename` entrega el PDF desde backend.
-3. Guardar en Vercel:
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY` (no usar publishable key para escritura/borrado desde API)
-
-## Configuracion en Vercel
-
-1. Importar el repositorio en Vercel.
-2. Runtime Node.js (default).
-3. Agregar las variables de entorno del bloque anterior.
-4. Deploy.
 
 ## Rutas
 
@@ -45,18 +29,28 @@ Referencia local: `.env.example`.
 - `/api/auth/logout`: logout admin
 - `/api/auth/session`: valida sesion
 - `/api/documents`: lista documentos
-- `/api/documents/upload-url?id=<document-id>`: genera URL firmada para subir PDF directo a Supabase
+- `/api/documents/upload?id=<document-id>`: reemplaza o crea un PDF
 - `/api/documents/delete?id=<document-id>`: borra PDF
-- `/docs/:filename`: entrega estable del PDF sin URL temporal visible
+- `/docs/:filename`: entrega el PDF publicado
 
 ## Desarrollo local
 
 ```bash
 npm install
-npx vercel dev
+npm run dev
 ```
+
+## Despliegue en VPS
+
+1. Instala dependencias con `npm install`.
+2. Define las variables de entorno.
+3. Crea un directorio persistente para `DOCUMENTS_DIR`.
+4. Levanta la app con `npm start`.
+5. Publica el puerto con Nginx, Caddy o tu reverse proxy.
+
+En el primer arranque, la app copia automaticamente a `DOCUMENTS_DIR` cualquier PDF base que ya exista en la raiz del proyecto.
 
 ## Importante
 
-- La `SUPABASE_SERVICE_ROLE_KEY` es secreta: solo backend (variables de entorno), nunca frontend.
-- Si ya publicaste una clave por error, rota la clave en Supabase.
+- Los PDFs quedan en el disco del servidor. Si recreas el contenedor o la maquina sin volumen persistente, se pierden.
+- `DOCUMENTS_DIR` debe apuntar a una ruta con permisos de lectura y escritura para el proceso Node.

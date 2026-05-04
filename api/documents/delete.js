@@ -1,9 +1,8 @@
 const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
-const { createServiceClient } = require("../_lib/supabase");
 const { DOCUMENTS_BY_ID } = require("../_lib/documents");
+const { deleteDocument, ensureStorageDir } = require("../_lib/filesystem");
 const { getQueryParam } = require("../_lib/url");
-const { ensureBucketExists } = require("../_lib/storage");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "DELETE") {
@@ -25,23 +24,8 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const supabase = createServiceClient(config);
-    const bucketCheck = await ensureBucketExists(supabase, config.bucket);
-    if (!bucketCheck.ok) {
-      res.status(500).json({
-        error: `No se pudo acceder al bucket '${config.bucket}': ${bucketCheck.error.message}`,
-      });
-      return;
-    }
-
-    const { error } = await supabase.storage
-      .from(config.bucket)
-      .remove([documentDefinition.filename]);
-
-    if (error) {
-      res.status(500).json({ error: `No se pudo borrar el PDF: ${error.message}` });
-      return;
-    }
+    await ensureStorageDir(config.storageDir);
+    await deleteDocument(config.storageDir, documentDefinition.filename);
 
     res.status(200).json({
       ok: true,

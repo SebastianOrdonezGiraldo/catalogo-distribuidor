@@ -2,15 +2,16 @@
   "name": "catalogo-distribuidor",
   "version": "1.0.0",
   "private": true,
-  "description": "Sitio catalogo con admin en Vercel y almacenamiento en Supabase",
+  "description": "Sitio catalogo con admin en Node.js y almacenamiento local en VPS",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "node server.js",
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.8",
-    "busboy": "^1.6.0"
+    "busboy": "^1.6.0",
+    "express": "^4.21.2"
   }
 }

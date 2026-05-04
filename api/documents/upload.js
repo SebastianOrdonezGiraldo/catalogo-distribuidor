@@ -1,7 +1,7 @@
 const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
-const { createServiceClient } = require("../_lib/supabase");
 const { DOCUMENTS_BY_ID } = require("../_lib/documents");
+const { ensureStorageDir, writeDocument } = require("../_lib/filesystem");
 const { parseMultipartPdf } = require("../_lib/request");
 const { getQueryParam } = require("../_lib/url");
 
@@ -33,18 +33,8 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const supabase = createServiceClient(config);
-    const { error } = await supabase.storage
-      .from(config.bucket)
-      .upload(documentDefinition.filename, uploaded.buffer, {
-        contentType: "application/pdf",
-        upsert: true,
-      });
-
-    if (error) {
-      res.status(500).json({ error: `No se pudo subir el PDF: ${error.message}` });
-      return;
-    }
+    await ensureStorageDir(config.storageDir);
+    await writeDocument(config.storageDir, documentDefinition.filename, uploaded.buffer);
 
     res.status(200).json({
       ok: true,
