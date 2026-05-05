@@ -283,11 +283,16 @@
         }
         try {
           setStatus(dashboardStatus, "Borrando PDF...", "");
-          await apiRequest("/api/documents/delete?id=" + encodeURIComponent(id), {
-            method: "DELETE"
+          const result = await apiRequest("/api/documents/delete?id=" + encodeURIComponent(id), {
+            method: "DELETE",
           });
+          const list = Array.isArray(result.documents) ? result.documents : [];
+          if (list.length) {
+            renderDocuments(list);
+          } else {
+            await loadDocuments();
+          }
           setStatus(dashboardStatus, "Documento borrado.", "ok");
-          await loadDocuments();
         } catch (error) {
           setStatus(dashboardStatus, error.message, "error");
         }

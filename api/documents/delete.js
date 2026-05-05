@@ -1,5 +1,6 @@
 const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
+const { getDocumentsPayload } = require("../_lib/documentListPayload");
 const { DOCUMENTS_BY_ID } = require("../_lib/documents");
 const { deleteDocument, ensureStorageDir } = require("../_lib/filesystem");
 const { getQueryParam } = require("../_lib/url");
@@ -27,10 +28,18 @@ module.exports = async function handler(req, res) {
     await ensureStorageDir(config.storageDir);
     await deleteDocument(config.storageDir, documentDefinition.filename);
 
+    const { documents } = await getDocumentsPayload(config.storageDir);
+
+    res.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.setHeader("Vary", "Cookie");
+
     res.status(200).json({
       ok: true,
       id: documentDefinition.id,
       filename: documentDefinition.filename,
+      documents,
     });
   } catch (error) {
     const statusCode = error.statusCode || 500;

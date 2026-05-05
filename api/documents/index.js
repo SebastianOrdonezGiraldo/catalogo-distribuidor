@@ -1,7 +1,6 @@
 const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
-const { DOCUMENTS } = require("../_lib/documents");
-const { ensureStorageDir, getDocumentInfo } = require("../_lib/filesystem");
+const { getDocumentsPayload } = require("../_lib/documentListPayload");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -16,21 +15,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    await ensureStorageDir(config.storageDir);
-
-    const documents = await Promise.all(
-      DOCUMENTS.map(async (doc) => {
-        const storageItem = await getDocumentInfo(config.storageDir, doc.filename);
-
-        return {
-          ...doc,
-          url: `/docs/${encodeURIComponent(doc.filename)}`,
-          exists: storageItem.exists,
-          size: storageItem.size,
-          updatedAt: storageItem.updatedAt,
-        };
-      }),
-    );
+    const { documents } = await getDocumentsPayload(config.storageDir);
 
     res.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
     res.setHeader("Pragma", "no-cache");
