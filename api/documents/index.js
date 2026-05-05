@@ -32,6 +32,11 @@ module.exports = async function handler(req, res) {
       }),
     );
 
+    res.setHeader("Cache-Control", "private, no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    res.setHeader("Vary", "Cookie");
+
     res.status(200).json({
       storageDir: config.storageDir,
       documents,
