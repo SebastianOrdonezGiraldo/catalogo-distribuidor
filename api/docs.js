@@ -1,6 +1,6 @@
 const { ensureStorageConfig } = require("./_lib/config");
-const { DOCUMENTS, DOCUMENTS_BY_FILENAME } = require("./_lib/documents");
-const { readDocument, seedDocuments } = require("./_lib/filesystem");
+const { DOCUMENTS_BY_FILENAME } = require("./_lib/documents");
+const { ensureStorageDir, readDocument } = require("./_lib/filesystem");
 const { getQueryParam } = require("./_lib/url");
 
 module.exports = async function handler(req, res) {
@@ -19,11 +19,7 @@ module.exports = async function handler(req, res) {
     }
 
     const config = ensureStorageConfig();
-    await seedDocuments(
-      config.storageDir,
-      process.cwd(),
-      DOCUMENTS.map((document) => document.filename),
-    );
+    await ensureStorageDir(config.storageDir);
     let fileBuffer;
     try {
       fileBuffer = await readDocument(config.storageDir, documentDefinition.filename);

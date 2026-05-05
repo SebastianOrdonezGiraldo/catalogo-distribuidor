@@ -6,6 +6,9 @@ const path = require("path");
 const authLoginHandler = require("./api/auth/login");
 const authLogoutHandler = require("./api/auth/logout");
 const authSessionHandler = require("./api/auth/session");
+const { ensureStorageConfig } = require("./api/_lib/config");
+const { DOCUMENTS } = require("./api/_lib/documents");
+const { ensureStorageDir, seedDocuments } = require("./api/_lib/filesystem");
 const documentsDeleteHandler = require("./api/documents/delete");
 const documentsIndexHandler = require("./api/documents/index");
 const documentsUploadHandler = require("./api/documents/upload");
@@ -49,6 +52,22 @@ app.delete("/api/documents/delete", documentsDeleteHandler);
 app.use("/admin", express.static(path.join(rootDir, "admin")));
 app.use(express.static(rootDir));
 
-app.listen(port, () => {
-  console.log(`Catalogo disponible en http://localhost:${port}`);
+async function prepareStorageOnce() {
+  try {
+    const config = ensureStorageConfig();
+    await ensureStorageDir(config.storageDir);
+    await seedDocuments(
+      config.storageDir,
+      process.cwd(),
+      DOCUMENTS.map((document) => document.filename),
+    );
+  } catch (error) {
+    console.error(`No se pudo inicializar DOCUMENTS_DIR: ${error.message}`);
+  }
+}
+
+prepareStorageOnce().finally(() => {
+  app.listen(port, () => {
+    console.log(`Catalogo disponible en http://localhost:${port}`);
+  });
 });

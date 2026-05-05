@@ -1,7 +1,7 @@
 const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
 const { DOCUMENTS } = require("../_lib/documents");
-const { ensureStorageDir, getDocumentInfo, seedDocuments } = require("../_lib/filesystem");
+const { ensureStorageDir, getDocumentInfo } = require("../_lib/filesystem");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -17,11 +17,6 @@ module.exports = async function handler(req, res) {
     }
 
     await ensureStorageDir(config.storageDir);
-    await seedDocuments(
-      config.storageDir,
-      process.cwd(),
-      DOCUMENTS.map((document) => document.filename),
-    );
 
     const documents = await Promise.all(
       DOCUMENTS.map(async (doc) => {
