@@ -8,7 +8,7 @@ const authLogoutHandler = require("./api/auth/logout");
 const authSessionHandler = require("./api/auth/session");
 const { ensureStorageConfig } = require("./api/_lib/config");
 const { DOCUMENTS } = require("./api/_lib/documents");
-const { ensureStorageDir, seedDocuments } = require("./api/_lib/filesystem");
+const { ensureStorageDir, seedBundledDocumentsOnce } = require("./api/_lib/filesystem");
 const documentsDeleteHandler = require("./api/documents/delete");
 const documentsIndexHandler = require("./api/documents/index");
 const documentsUploadHandler = require("./api/documents/upload");
@@ -56,7 +56,7 @@ async function prepareStorageOnce() {
   try {
     const config = ensureStorageConfig();
     await ensureStorageDir(config.storageDir);
-    await seedDocuments(
+    await seedBundledDocumentsOnce(
       config.storageDir,
       process.cwd(),
       DOCUMENTS.map((document) => document.filename),

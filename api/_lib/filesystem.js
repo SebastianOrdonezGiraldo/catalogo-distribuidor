@@ -33,6 +33,33 @@ async function seedDocuments(storageDir, sourceDir, filenames) {
   );
 }
 
+/** Una sola vez: copiar PDF incluidos en el repo al almacén. Reinicios siguientes no reviven borrados desde el admin. */
+const SEED_MARKER_FILENAME = ".bundled_catalog_seed_done";
+
+function isBundledSeedForced() {
+  const v = String(process.env.DOCUMENTS_FORCE_RESEED || "").toLowerCase();
+  return v === "1" || v === "true" || v === "yes";
+}
+
+async function seedBundledDocumentsOnce(storageDir, sourceDir, filenames) {
+  await ensureStorageDir(storageDir);
+
+  const markerPath = path.join(storageDir, SEED_MARKER_FILENAME);
+  if (!isBundledSeedForced()) {
+    try {
+      await fs.stat(markerPath);
+      return;
+    } catch (error) {
+      if (!error || error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+
+  await seedDocuments(storageDir, sourceDir, filenames);
+  await fs.writeFile(markerPath, `${new Date().toISOString()}\n`, "utf8");
+}
+
 function getDocumentPath(storageDir, filename) {
   return path.join(storageDir, filename);
 }
@@ -92,6 +119,8 @@ async function deleteDocument(storageDir, filename) {
 module.exports = {
   ensureStorageDir,
   seedDocuments,
+  seedBundledDocumentsOnce,
+  getDocumentPath,
   getDocumentInfo,
   readDocument,
   writeDocument,
