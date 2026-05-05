@@ -2,7 +2,7 @@ const { ensureConfig } = require("../_lib/config");
 const { requireAuth } = require("../_lib/auth");
 const { getDocumentsPayload } = require("../_lib/documentListPayload");
 const { DOCUMENTS_BY_ID } = require("../_lib/documents");
-const { deleteDocument, ensureStorageDir } = require("../_lib/filesystem");
+const { deleteDocument, ensureStorageDir, getDocumentInfo } = require("../_lib/filesystem");
 const { getQueryParam } = require("../_lib/url");
 
 module.exports = async function handler(req, res) {
@@ -27,6 +27,15 @@ module.exports = async function handler(req, res) {
 
     await ensureStorageDir(config.storageDir);
     await deleteDocument(config.storageDir, documentDefinition.filename);
+
+    const afterDelete = await getDocumentInfo(config.storageDir, documentDefinition.filename);
+    if (afterDelete.exists) {
+      res.status(500).json({
+        error:
+          "El PDF no se pudo eliminar del disco (permisos, ruta DOCUMENTS_DIR o copia duplicada del archivo).",
+      });
+      return;
+    }
 
     const { documents } = await getDocumentsPayload(config.storageDir);
 

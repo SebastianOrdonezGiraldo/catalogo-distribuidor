@@ -246,6 +246,12 @@
     return payload;
   }
 
+  function applyAbsentById(documents, absentId) {
+    return documents.map((doc) =>
+      doc.id === absentId ? Object.assign({}, doc, { exists: false, size: 0, updatedAt: null }) : doc,
+    );
+  }
+
   function attachTableHandlers() {
     for (const uploadForm of document.querySelectorAll("form[data-upload-id]")) {
       uploadForm.addEventListener("submit", async (event) => {
@@ -286,12 +292,20 @@
           const result = await apiRequest("/api/documents/delete?id=" + encodeURIComponent(id), {
             method: "DELETE",
           });
-          const list = Array.isArray(result.documents) ? result.documents : [];
-          if (list.length) {
-            renderDocuments(list);
-          } else {
-            await loadDocuments();
+          let list =
+            Array.isArray(result.documents) && result.documents.length ? result.documents.slice() : [];
+          if (!list.length) {
+            const refreshed = await apiRequest("/api/documents?_=" + encodeURIComponent(Date.now()), {
+              method: "GET",
+            });
+            list = (refreshed.documents || []).slice();
           }
+          if (!list.length) {
+            setStatus(dashboardStatus, "Borrado ok, pero no se pudo recargar la tabla. Pulsa Actualizar.", "error");
+            return;
+          }
+          list = applyAbsentById(list, id);
+          renderDocuments(list);
           setStatus(dashboardStatus, "Documento borrado.", "ok");
         } catch (error) {
           setStatus(dashboardStatus, error.message, "error");
@@ -306,13 +320,14 @@
       return;
     }
     documentsBody.innerHTML = documents.map((doc) => {
-      const statusBadge = doc.exists
+      const exists = !!doc.exists;
+      const statusBadge = exists
         ? "<span class='pill ok'>Disponible</span>"
         : "<span class='pill off'>No disponible</span>";
-      const viewButton = doc.exists
+      const viewButton = exists
         ? "<a class='button ghost' href='" + doc.url + "' target='_blank' rel='noopener noreferrer'>Ver PDF</a>"
         : "<button class='button ghost' disabled>Ver PDF</button>";
-      const disableDelete = doc.exists ? "" : "disabled";
+      const disableDelete = exists ? "" : "disabled";
       return "<tr>" +
         "<td>" + doc.label + "</td>" +
         "<td><strong>" + doc.filename + "</strong><br><span class='small'>" + formatBytes(doc.size) + "</span></td>" +
